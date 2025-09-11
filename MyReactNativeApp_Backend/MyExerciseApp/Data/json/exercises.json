@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "exerciseName": "Squat",
+    "workoutType": "Strength",
+    "mainTargetMuscle": "Legs",
+    "exerciseGroup": "Compound",
+    "image": "https://i.postimg.cc/Wp0rr0VK/squat.jpg"
+  },
+  {
+    "id": 2,
+    "exerciseName": "Deadlift",
+    "workoutType": "Strength",
+    "mainTargetMuscle": "Legs",
+    "exerciseGroup": "Compound",
+    "image": ""
+  },
+  {
+    "id": 3,
+    "exerciseName": "Bench press",
+    "workoutType": "Strength",
+    "mainTargetMuscle": "Chest",
+    "exerciseGroup": "Compound",
+    "image": ""
+  }
+]
