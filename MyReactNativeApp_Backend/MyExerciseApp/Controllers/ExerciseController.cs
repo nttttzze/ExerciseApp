@@ -71,6 +71,16 @@ public class ExerciseController : ControllerBase
                 ExerciseGroup = model.ExerciseGroup,
                 Image = model.Image,
             };
+
+            bool alreadyExists = await _context.Exercises.AnyAsync(x => x.ExerciseName == model.ExerciseName);
+
+            if (alreadyExists)
+            {
+                return BadRequest(new { success = false, message = "Exercise already exists." });
+            }
+
+
+
             await _context.Exercises.AddAsync(exercise);
             await _context.SaveChangesAsync();
 
@@ -81,4 +91,6 @@ public class ExerciseController : ControllerBase
             return StatusCode(500, new { success = false, message = ex.Message });
         }
     }
+
+
 }

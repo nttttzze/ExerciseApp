@@ -10,6 +10,9 @@ using Microsoft.Extensions.Logging;
 using MyExerciseApp.Entities;
 using MyExerciseApp.Models;
 using System.IO.Compression;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Diagnostics.CodeAnalysis;
+
 
 namespace MyExerciseApp.Controllers;
 
@@ -60,7 +63,6 @@ public class WorkoutController : ControllerBase
         }
     }
 
-    // Returnerar bara Success=true workout=null
     [HttpGet("findWorkout/{workoutName}")]
     public async Task<ActionResult> FindWorkout(string workoutName)
     {
@@ -69,6 +71,7 @@ public class WorkoutController : ControllerBase
             var w = await _context.Workout
             .Include(x => x.WorkoutItems)
                 .ThenInclude(w => w.Exercise)
+                .Where(x => x.WorkoutName == workoutName)
             .Select(workout => new
             {
                 workout.WorkoutName,
@@ -78,11 +81,16 @@ public class WorkoutController : ControllerBase
                     wi.ExerciseOrder,
                     wi.Sets,
                     wi.Reps
-
                 }).ToList()
-            }).SingleOrDefaultAsync(x => x.WorkoutName == workoutName);
+            })
+            .FirstOrDefaultAsync();
+            // .SingleOrDefaultAsync();
 
-            // throw new Exception("Test exception");
+            if (w is null)
+            {
+                return NotFound(new { success = false, message = "Workout not found." });
+            }
+
 
             return Ok(new { success = true, workout = w });
 
@@ -129,6 +137,36 @@ public class WorkoutController : ControllerBase
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Exception in AddWorkout: {ex}");
+
+            return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
+        }
+    }
+
+
+    [HttpDelete("deleteWorkout/{workoutName}")]
+    public async Task<IActionResult> DeleteWorkout(string workoutName)
+    {
+        try
+        {
+            var deleteWorkout = await _context.Workout.FirstOrDefaultAsync(w => w.WorkoutName == workoutName);
+
+            if (deleteWorkout != null)
+            {
+                _context.Workout.Remove(deleteWorkout);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                return NotFound(new { success = false, message = "Workout not found. Nothing was deleted." });
+                // throw new Exception("fel");
+            }
+
+            return Ok(new { success = true, deletedWorkout = deleteWorkout.WorkoutName });
+
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Exception in DeleteWorkout: {ex}");
 
             return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
         }
