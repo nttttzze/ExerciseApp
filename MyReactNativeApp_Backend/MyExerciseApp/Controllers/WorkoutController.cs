@@ -12,6 +12,9 @@ using MyExerciseApp.Models;
 using System.IO.Compression;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Diagnostics.CodeAnalysis;
+using MyExerciseApp.Data.DTOs;
+using MyExerciseApp.Services.Interfaces;
+
 
 
 namespace MyExerciseApp.Controllers;
@@ -22,37 +25,55 @@ public class WorkoutController : ControllerBase
 {
     private readonly DataContext _context;
     private readonly HtmlSanitizer _htmlSanitizer = new();
+    private readonly IWorkoutService _workoutService;
 
-    public WorkoutController(DataContext context)
+    // public WorkoutController(DataContext context)
+    // {
+    //     _context = context;
+    // }
+    public WorkoutController(IWorkoutService workoutService, DataContext context)
     {
+        _workoutService = workoutService;
         _context = context;
     }
 
     [HttpGet("listWorkouts")]
     public async Task<ActionResult> ListWorkouts()
     {
+        // try
+        // {
+        //     var w = await _context.Workout
+        //     .Include(x => x.WorkoutItems)
+        //         .ThenInclude(w => w.Exercise)
+        //     .Select(workout => new
+        //     {
+        //         workout.WorkoutName,
+        //         WorkoutItem = workout.WorkoutItems.Select(wi => new
+        //         {
+        //             wi.Exercise.ExerciseName,
+        //             wi.ExerciseOrder,
+        //             wi.Sets,
+        //             wi.Reps
+
+        //         }).ToList()
+        //     }).ToListAsync();
+
+        //     // throw new Exception("Test exception");
+
+        //     return Ok(new { success = true, workout = w });
+
+        // }
+        // catch (Exception ex)
+        // {
+        //     // Log the exception details for internal tracking
+        //     Console.Error.WriteLine($"Exception in ListWorkouts: {ex}");
+
+        //     return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
+        // }
         try
         {
-            var w = await _context.Workout
-            .Include(x => x.WorkoutItems)
-                .ThenInclude(w => w.Exercise)
-            .Select(workout => new
-            {
-                workout.WorkoutName,
-                WorkoutItem = workout.WorkoutItems.Select(wi => new
-                {
-                    wi.Exercise.ExerciseName,
-                    wi.ExerciseOrder,
-                    wi.Sets,
-                    wi.Reps
-
-                }).ToList()
-            }).ToListAsync();
-
-            // throw new Exception("Test exception");
-
-            return Ok(new { success = true, workout = w });
-
+            var workout = await _workoutService.GetWorkoutsAsync();
+            return Ok(new { success = true, workout });
         }
         catch (Exception ex)
         {
@@ -61,6 +82,7 @@ public class WorkoutController : ControllerBase
 
             return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
         }
+
     }
 
     [HttpGet("findWorkout/{workoutName}")]
@@ -126,6 +148,7 @@ public class WorkoutController : ControllerBase
                     Sets = e.Sets,
                     Reps = e.Reps
 
+
                 })] // .ToList()
             };
             _context.Workout.Add(workout);
@@ -143,12 +166,38 @@ public class WorkoutController : ControllerBase
     }
 
 
-    [HttpDelete("deleteWorkout/{workoutName}")]
-    public async Task<IActionResult> DeleteWorkout(string workoutName)
+
+
+    /// <summary> -----------------------------------------------------------------------------
+    ///  Lös PATCH senare.
+    /// </summary>
+
+    /// 
+    // [HttpPatch("updateWorkout/{workoutId}")]
+    // public async Task<IActionResult> UpdateWorkout(int workoutId, [FromBody] UpdateWorkoutDto dto)
+    // {
+    //     var update = await _context.Workout.FirstOrDefaultAsync(wi => wi.WorkoutId == workoutId);
+
+    //     if (update != null)
+    //     {
+    //         update.WorkoutName = dto.WorkoutName,
+    //         update.ExerciseOrder = dto.ExerciseOrder,
+    //         update.Reps = dto.Reps,
+    //         update.Sets = dto.Sets
+    //     }
+    //     else
+    //     {
+    //         return NotFound(new { success = false, message = $"Produkten med ID {id} finns ej. " });
+    //     }
+    // }
+
+
+    [HttpDelete("deleteWorkout/{workoutId}")]
+    public async Task<IActionResult> DeleteWorkout(int workoutId)
     {
         try
         {
-            var deleteWorkout = await _context.Workout.FirstOrDefaultAsync(w => w.WorkoutName == workoutName);
+            var deleteWorkout = await _context.Workout.FirstOrDefaultAsync(w => w.WorkoutId == workoutId);
 
             if (deleteWorkout != null)
             {

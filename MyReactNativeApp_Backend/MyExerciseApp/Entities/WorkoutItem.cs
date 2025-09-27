@@ -19,5 +19,4 @@ public class WorkoutItem
     public string Sets { get; set; }
     public string Reps { get; set; }
 
-
 }

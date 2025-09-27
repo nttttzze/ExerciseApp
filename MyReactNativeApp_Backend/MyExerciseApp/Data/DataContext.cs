@@ -1,11 +1,13 @@
 using System.IO.Compression;
 using Microsoft.EntityFrameworkCore;
 using MyExerciseApp.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-public class DataContext : DbContext
+public class DataContext : IdentityDbContext<User>
 {
     public DbSet<Exercise> Exercises { get; set; }
     public DbSet<Workout> Workout { get; set; }
+    public DbSet<Schedule> Schedules { get; set; }
 
     public DataContext(DbContextOptions<DataContext> options) : base(options)
     { }

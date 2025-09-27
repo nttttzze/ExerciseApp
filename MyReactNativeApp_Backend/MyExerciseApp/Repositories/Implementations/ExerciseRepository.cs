@@ -20,27 +20,13 @@ public class ExerciseRepository : IExerciseRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<ExerciseDto>> GetAllExercisesAsync()
-    {
-        return await _context.Exercises
-        .Select(e => new ExerciseDto()
-        {
-            ExerciseName = e.ExerciseName,
-            MainTargetMuscle = e.MainTargetMuscle,
-        }).ToListAsync();
-
-    }
-
-
-    public Exercise GetById(int ExerciseId)
+    public Task<Exercise> AddExerciseAsync(Exercise exercise)
     {
         throw new NotImplementedException();
     }
 
-    public void Insert(Exercise exercise)
+    public Task<IEnumerable<ExerciseDto>> ListExercisesAsync()
     {
         throw new NotImplementedException();
     }
-
-
 }
