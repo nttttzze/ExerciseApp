@@ -11,7 +11,7 @@ namespace MyExerciseApp.Interfaces;
 public interface IWorkoutRepository
 {
     Task<IEnumerable<Workout>> GetWorkoutsAsync();
-    Task<Workout> FindWorkoutByNameAsync(string workoutName);
+    Task<Workout> GetWorkoutByNameAsync(string workoutName);
     Task AddWorkoutAsync(WorkoutPostViewModel model);
     Task<bool> UpdateWorkoutAsync(int workoutId, UpdateWorkoutDto dto);
     Task<bool> DeleteWorkoutAsync(string workoutName);

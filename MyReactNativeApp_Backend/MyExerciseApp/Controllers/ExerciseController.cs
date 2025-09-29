@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using MyExerciseApp.Models;
 using Ganss.Xss;
 using MyExerciseApp.Entities;
+using MyExerciseApp.Services.Interfaces;
 
 namespace MyExerciseApp.Controllers;
 
@@ -19,8 +20,10 @@ public class ExerciseController : ControllerBase
 {
     private readonly DataContext _context;
     private readonly HtmlSanitizer _htmlSanitizer = new();
-    public ExerciseController(DataContext context)
+    private readonly IExerciseService _exerciseService;
+    public ExerciseController(IExerciseService exerciseService, DataContext context)
     {
+        _exerciseService = exerciseService;
         _context = context;
     }
 
@@ -29,17 +32,8 @@ public class ExerciseController : ControllerBase
     {
         try
         {
-            var e = await _context.Exercises
-            .Select(e => new
-            {
-                e.ExerciseId,
-                e.ExerciseName,
-                e.WorkoutType,
-                e.MainTargetMuscle,
-                e.ExerciseGroup,
-                e.Image
-            }).ToListAsync();
-            return Ok(new { success = true, exercises = e });
+            var exercise = await _exerciseService.GetExercisesAsync();
+            return Ok(new { success = true, exercise });
         }
         catch (Exception ex)
         {
@@ -50,11 +44,11 @@ public class ExerciseController : ControllerBase
     [HttpPost("addExercise")]
     public async Task<IActionResult> AddExercise(ExercisePostViewModel model)
     {
-
         try
         {
             if (!ModelState.IsValid) return ValidationProblem();
 
+            // Sanering borde ligga i service.
             model.ExerciseName = _htmlSanitizer.Sanitize(model.ExerciseName);
             model.WorkoutType = _htmlSanitizer.Sanitize(model.WorkoutType);
             model.MainTargetMuscle = _htmlSanitizer.Sanitize(model.MainTargetMuscle);
@@ -63,26 +57,12 @@ public class ExerciseController : ControllerBase
             ModelState.Clear();
             TryValidateModel(model);
 
-            var exercise = new Exercise
-            {
-                ExerciseName = model.ExerciseName,
-                WorkoutType = model.WorkoutType,
-                MainTargetMuscle = model.MainTargetMuscle,
-                ExerciseGroup = model.ExerciseGroup,
-                Image = model.Image,
-            };
+            var exercise = await _exerciseService.AddExerciseAsync(model);
 
-            bool alreadyExists = await _context.Exercises.AnyAsync(x => x.ExerciseName == model.ExerciseName);
-
-            if (alreadyExists)
+            if (exercise == null)
             {
-                return BadRequest(new { success = false, message = "Exercise already exists." });
+                return Conflict(new { success = false, message = "Exercise already exists." });
             }
-
-
-
-            await _context.Exercises.AddAsync(exercise);
-            await _context.SaveChangesAsync();
 
             return Ok(new { success = true, data = exercise, message = "Exercise successfully added." });
         }

@@ -8,6 +8,7 @@ using MyExerciseApp.Models;
 using MyExerciseApp.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using MyExerciseApp.Interfaces;
+// using System.Data.Entity;
 
 namespace MyExerciseApp.Repositories.Implementations;
 
@@ -29,6 +30,14 @@ public class WorkoutRepository : IWorkoutRepository
                     .ToListAsync();
     }
 
+    public async Task<Workout> GetWorkoutByNameAsync(string workoutName)
+    {
+        return await _context.Workout
+            .Include(x => x.WorkoutItems)
+                .ThenInclude(w => w.Exercise)
+                .Where(x => x.WorkoutName == workoutName).FirstOrDefaultAsync();
+    }
+
     public Task AddWorkoutAsync(WorkoutPostViewModel model)
     {
         throw new NotImplementedException();
@@ -39,10 +48,7 @@ public class WorkoutRepository : IWorkoutRepository
         throw new NotImplementedException();
     }
 
-    public Task<Workout> FindWorkoutByNameAsync(string workoutName)
-    {
-        throw new NotImplementedException();
-    }
+
 
 
 

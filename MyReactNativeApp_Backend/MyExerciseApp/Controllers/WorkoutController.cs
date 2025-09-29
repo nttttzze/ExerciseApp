@@ -40,36 +40,6 @@ public class WorkoutController : ControllerBase
     [HttpGet("listWorkouts")]
     public async Task<ActionResult> ListWorkouts()
     {
-        // try
-        // {
-        //     var w = await _context.Workout
-        //     .Include(x => x.WorkoutItems)
-        //         .ThenInclude(w => w.Exercise)
-        //     .Select(workout => new
-        //     {
-        //         workout.WorkoutName,
-        //         WorkoutItem = workout.WorkoutItems.Select(wi => new
-        //         {
-        //             wi.Exercise.ExerciseName,
-        //             wi.ExerciseOrder,
-        //             wi.Sets,
-        //             wi.Reps
-
-        //         }).ToList()
-        //     }).ToListAsync();
-
-        //     // throw new Exception("Test exception");
-
-        //     return Ok(new { success = true, workout = w });
-
-        // }
-        // catch (Exception ex)
-        // {
-        //     // Log the exception details for internal tracking
-        //     Console.Error.WriteLine($"Exception in ListWorkouts: {ex}");
-
-        //     return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
-        // }
         try
         {
             var workout = await _workoutService.GetWorkoutsAsync();
@@ -82,7 +52,6 @@ public class WorkoutController : ControllerBase
 
             return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
         }
-
     }
 
     [HttpGet("findWorkout/{workoutName}")]
@@ -90,32 +59,15 @@ public class WorkoutController : ControllerBase
     {
         try
         {
-            var w = await _context.Workout
-            .Include(x => x.WorkoutItems)
-                .ThenInclude(w => w.Exercise)
-                .Where(x => x.WorkoutName == workoutName)
-            .Select(workout => new
-            {
-                workout.WorkoutName,
-                WorkoutItem = workout.WorkoutItems.Select(wi => new
-                {
-                    wi.Exercise.ExerciseName,
-                    wi.ExerciseOrder,
-                    wi.Sets,
-                    wi.Reps
-                }).ToList()
-            })
-            .FirstOrDefaultAsync();
-            // .SingleOrDefaultAsync();
 
-            if (w is null)
+            var workout = await _workoutService.GetWorkoutByNameAsync(workoutName);
+
+            if (workout is null)
             {
                 return NotFound(new { success = false, message = "Workout not found." });
             }
 
-
-            return Ok(new { success = true, workout = w });
-
+            return Ok(new { success = true, workout });
         }
         catch (Exception ex)
         {

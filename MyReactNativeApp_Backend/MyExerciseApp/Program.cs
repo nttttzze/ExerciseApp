@@ -12,6 +12,7 @@ using MyExerciseApp.Services.Interfaces;
 using MyExerciseApp.Services.Implementations;
 using MyExerciseApp.Repositories.Implementations;
 using MyExerciseApp.Interfaces;
+using MyExerciseApp.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,8 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
 builder.Services.AddScoped<IWorkoutService, WorkoutService>();
+builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
+builder.Services.AddScoped<IExerciseService, ExerciseService>();
 
 builder.Services.AddCors();
 

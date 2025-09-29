@@ -9,6 +9,7 @@ namespace MyExerciseApp.Repositories;
 
 public interface IExerciseRepository
 {
-    Task<IEnumerable<ExerciseDto>> ListExercisesAsync();
+    Task<IEnumerable<Exercise>> GetExercisesAsync();
     Task<Exercise> AddExerciseAsync(Exercise exercise);
+    Task<bool> ExerciseExistsAsync(string ExerciseName);
 }

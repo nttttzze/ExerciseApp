@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MyExerciseApp.Data.DTOs;
 using MyExerciseApp.Entities;
 
 namespace MyExerciseApp.Repositories;
 
 
-/// <summary>
-/// Testing new stuff
-/// </summary>
 public class ExerciseRepository : IExerciseRepository
 {
     private readonly DataContext _context;
@@ -19,14 +17,21 @@ public class ExerciseRepository : IExerciseRepository
     {
         _context = context;
     }
-
-    public Task<Exercise> AddExerciseAsync(Exercise exercise)
+    public async Task<IEnumerable<Exercise>> GetExercisesAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Exercises.ToListAsync();
     }
 
-    public Task<IEnumerable<ExerciseDto>> ListExercisesAsync()
+    public async Task<Exercise> AddExerciseAsync(Exercise exercise)
     {
-        throw new NotImplementedException();
+
+        await _context.Exercises.AddAsync(exercise);
+        await _context.SaveChangesAsync();
+        return exercise;
+    }
+
+    public async Task<bool> ExerciseExistsAsync(string ExerciseName)
+    {
+        return await _context.Exercises.AnyAsync(x => x.ExerciseName == ExerciseName);
     }
 }

@@ -41,6 +41,24 @@ public class WorkoutService : IWorkoutService
         }).ToList();
     }
 
+    public async Task<WorkoutDto> GetWorkoutByNameAsync(string workoutName)
+    {
+        var w = await _repo.GetWorkoutByNameAsync(workoutName);
+
+        return new WorkoutDto
+        {
+            WorkoutName = w.WorkoutName,
+            WorkoutItems = w.WorkoutItems.Select(wi => new WorkoutItemDto
+            {
+                ExerciseName = wi.Workout.WorkoutName,
+                ExerciseOrder = wi.ExerciseOrder,
+                Sets = wi.Sets,
+                Reps = wi.Reps
+            }).ToList()
+        };
+    }
+
+
     public async Task<bool> CreateWorkoutAsync(WorkoutPostViewModel model)
     {
         await _repo.AddWorkoutAsync(model);
@@ -52,10 +70,6 @@ public class WorkoutService : IWorkoutService
         return await _repo.DeleteWorkoutAsync(workoutName);
     }
 
-    public async Task<Workout> GetWorkoutByNameAsync(string workoutName)
-    {
-        return await _repo.FindWorkoutByNameAsync(workoutName);
-    }
 
     public async Task<bool> UpdateWorkoutAsync(int workoutId, UpdateWorkoutDto dto)
     {
