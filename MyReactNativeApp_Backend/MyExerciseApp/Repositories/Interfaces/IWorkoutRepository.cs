@@ -12,7 +12,8 @@ public interface IWorkoutRepository
 {
     Task<IEnumerable<Workout>> GetWorkoutsAsync();
     Task<Workout> GetWorkoutByNameAsync(string workoutName);
-    Task AddWorkoutAsync(WorkoutPostViewModel model);
+    Task<Workout> AddWorkoutAsync(Workout workout);
+    Task<bool> DeleteWorkoutAsync(int workoutId);
     Task<bool> UpdateWorkoutAsync(int workoutId, UpdateWorkoutDto dto);
-    Task<bool> DeleteWorkoutAsync(string workoutName);
+
 }

@@ -45,12 +45,17 @@ public class WorkoutService : IWorkoutService
     {
         var w = await _repo.GetWorkoutByNameAsync(workoutName);
 
+        // Returnerar 0 på workout id och exercise id.
+        // DB visar korrekt workoutId och exerciseId.
+        // Fungerar nu, hade inte implementerat Workout/Exercise Id i return.
         return new WorkoutDto
         {
             WorkoutName = w.WorkoutName,
+            WorkoutId = w.WorkoutId,
             WorkoutItems = w.WorkoutItems.Select(wi => new WorkoutItemDto
             {
-                ExerciseName = wi.Workout.WorkoutName,
+                ExerciseName = wi.Exercise.ExerciseName,
+                ExerciseId = wi.ExerciseId,
                 ExerciseOrder = wi.ExerciseOrder,
                 Sets = wi.Sets,
                 Reps = wi.Reps
@@ -59,21 +64,51 @@ public class WorkoutService : IWorkoutService
     }
 
 
-    public async Task<bool> CreateWorkoutAsync(WorkoutPostViewModel model)
+    public async Task<WorkoutDto> AddWorkoutAsync(WorkoutPostViewModel model)
     {
-        await _repo.AddWorkoutAsync(model);
-        return true;
+        var workout = new Workout
+        {
+            WorkoutName = model.WorkoutName,
+            WorkoutItems = model.Exercises.Select(e => new WorkoutItem
+            {
+                ExerciseId = e.ExerciseId,
+                ExerciseOrder = e.ExerciseOrder,
+                Sets = e.Sets,
+                Reps = e.Reps
+
+
+            }).ToList()
+        };
+
+        var savedWorkout = await _repo.AddWorkoutAsync(workout);
+
+        return new WorkoutDto
+
+        {
+            WorkoutName = savedWorkout.WorkoutName,
+            WorkoutItems = savedWorkout.WorkoutItems.Select(wi => new WorkoutItemDto
+            {
+                ExerciseName = wi.Exercise.ExerciseName, // Returnerar namnet på vald övning.
+                ExerciseId = wi.ExerciseId,
+                ExerciseOrder = wi.ExerciseOrder,
+                Sets = wi.Sets,
+                Reps = wi.Reps
+
+
+            }).ToList()
+        };
     }
 
-    public async Task<bool> DeleteWorkoutAsync(string workoutName)
+    public async Task<bool> DeleteWorkoutAsync(int workoutId)
     {
-        return await _repo.DeleteWorkoutAsync(workoutName);
+        return await _repo.DeleteWorkoutAsync(workoutId);
     }
 
 
     public async Task<bool> UpdateWorkoutAsync(int workoutId, UpdateWorkoutDto dto)
     {
         return await _repo.UpdateWorkoutAsync(workoutId, dto);
+        // Inte Klar
     }
 
 }

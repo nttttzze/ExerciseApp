@@ -1,15 +1,6 @@
-using System;
-using System.Collections.Generic;
-// using System.Data.Entity;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using MyExerciseApp.Models;
 using Ganss.Xss;
-using MyExerciseApp.Entities;
 using MyExerciseApp.Services.Interfaces;
 
 namespace MyExerciseApp.Controllers;
@@ -18,13 +9,11 @@ namespace MyExerciseApp.Controllers;
 [Route("api/[controller]")]
 public class ExerciseController : ControllerBase
 {
-    private readonly DataContext _context;
     private readonly HtmlSanitizer _htmlSanitizer = new();
     private readonly IExerciseService _exerciseService;
-    public ExerciseController(IExerciseService exerciseService, DataContext context)
+    public ExerciseController(IExerciseService exerciseService)
     {
         _exerciseService = exerciseService;
-        _context = context;
     }
 
     [HttpGet("listExercises")]
@@ -48,7 +37,8 @@ public class ExerciseController : ControllerBase
         {
             if (!ModelState.IsValid) return ValidationProblem();
 
-            // Sanering borde ligga i service.
+            // ----- Sanering borde ligga i service. -----
+
             model.ExerciseName = _htmlSanitizer.Sanitize(model.ExerciseName);
             model.WorkoutType = _htmlSanitizer.Sanitize(model.WorkoutType);
             model.MainTargetMuscle = _htmlSanitizer.Sanitize(model.MainTargetMuscle);
@@ -71,6 +61,4 @@ public class ExerciseController : ControllerBase
             return StatusCode(500, new { success = false, message = ex.Message });
         }
     }
-
-
 }

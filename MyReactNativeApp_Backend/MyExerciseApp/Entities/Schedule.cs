@@ -8,7 +8,7 @@ namespace MyExerciseApp.Entities;
 public class Schedule
 {
     public int ScheduleId { get; set; }
-    public DateTime ShceduledWorkout { get; set; }
+    public DateTime ScheduledWorkout { get; set; }
 
     public int WorkoutId { get; set; }
 

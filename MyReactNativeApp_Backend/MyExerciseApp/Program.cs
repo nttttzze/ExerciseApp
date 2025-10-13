@@ -29,10 +29,17 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UserAndAdmin", policy => policy.RequireRole("User", "Admin"));
 });
 
+// Workout
 builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
 builder.Services.AddScoped<IWorkoutService, WorkoutService>();
+
+// Exercise
 builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IExerciseService, ExerciseService>();
+
+// Schedule
+builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
 
 builder.Services.AddCors();
 

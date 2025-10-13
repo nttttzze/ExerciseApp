@@ -9,6 +9,6 @@ public class WorkoutDto
 {
     public int WorkoutId { get; set; }
 
-    public string WorkoutName { get; set; } = string.Empty;
+    public string WorkoutName { get; set; }
     public List<WorkoutItemDto> WorkoutItems { get; set; } = new();
 }

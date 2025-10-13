@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MyExerciseApp.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20251004124257_Update")]
+    partial class Update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
@@ -178,7 +181,7 @@ namespace MyExerciseApp.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("ScheduledWorkout")
+                    b.Property<DateTime>("ShceduledWorkout")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("WorkoutId")
@@ -279,6 +282,9 @@ namespace MyExerciseApp.Migrations
 
                     b.Property<int>("ExerciseId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ExerciseName")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ExerciseOrder")
                         .HasColumnType("INTEGER");

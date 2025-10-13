@@ -1,21 +1,9 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Ganss.Xss;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using MyExerciseApp.Entities;
 using MyExerciseApp.Models;
-using System.IO.Compression;
-using Microsoft.EntityFrameworkCore.Storage;
-using System.Diagnostics.CodeAnalysis;
-using MyExerciseApp.Data.DTOs;
 using MyExerciseApp.Services.Interfaces;
-
-
 
 namespace MyExerciseApp.Controllers;
 
@@ -23,18 +11,13 @@ namespace MyExerciseApp.Controllers;
 [Route("api/[controller]")]
 public class WorkoutController : ControllerBase
 {
-    private readonly DataContext _context;
+
     private readonly HtmlSanitizer _htmlSanitizer = new();
     private readonly IWorkoutService _workoutService;
 
-    // public WorkoutController(DataContext context)
-    // {
-    //     _context = context;
-    // }
-    public WorkoutController(IWorkoutService workoutService, DataContext context)
+    public WorkoutController(IWorkoutService workoutService)
     {
         _workoutService = workoutService;
-        _context = context;
     }
 
     [HttpGet("listWorkouts")]
@@ -59,7 +42,6 @@ public class WorkoutController : ControllerBase
     {
         try
         {
-
             var workout = await _workoutService.GetWorkoutByNameAsync(workoutName);
 
             if (workout is null)
@@ -86,28 +68,12 @@ public class WorkoutController : ControllerBase
             if (!ModelState.IsValid) return ValidationProblem();
 
             model.WorkoutName = _htmlSanitizer.Sanitize(model.WorkoutName);
-            // model.Exercises = _htmlSanitizer.Sanitize(model.Exercises);
             ModelState.Clear();
             TryValidateModel(model);
 
-            var workout = new Workout
-            {
-                WorkoutName = model.WorkoutName,
-                WorkoutItems = [.. model.Exercises.Select(e => new WorkoutItem
-                {
-                    ExerciseId = e.ExerciseId,
-                    ExerciseOrder = e.ExerciseOrder,
-                    Sets = e.Sets,
-                    Reps = e.Reps
+            var workout = await _workoutService.AddWorkoutAsync(model);
 
-
-                })] // .ToList()
-            };
-            _context.Workout.Add(workout);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { success = true, data = workout });
-
+            return Ok(new { success = true, workout });
         }
         catch (Exception ex)
         {
@@ -117,11 +83,32 @@ public class WorkoutController : ControllerBase
         }
     }
 
+    [HttpDelete("deleteWorkout/{workoutId}")]
+    public async Task<IActionResult> DeleteWorkout(int workoutId)
+    {
+        try
+        {
+            var deleteWorkout = await _workoutService.DeleteWorkoutAsync(workoutId);
 
+            if (!deleteWorkout)
+            {
+                return NotFound(new { success = false, message = "Workout not found." });
+            }
+
+            return Ok(new { success = true, message = "Workout deleted succesfully." });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Exception in DeleteWorkout: {ex}");
+
+            return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
+        }
+    }
 
 
     /// <summary> -----------------------------------------------------------------------------
     ///  Lös PATCH senare.
+    ///  Inte Klar
     /// </summary>
 
     /// 
@@ -143,33 +130,4 @@ public class WorkoutController : ControllerBase
     //     }
     // }
 
-
-    [HttpDelete("deleteWorkout/{workoutId}")]
-    public async Task<IActionResult> DeleteWorkout(int workoutId)
-    {
-        try
-        {
-            var deleteWorkout = await _context.Workout.FirstOrDefaultAsync(w => w.WorkoutId == workoutId);
-
-            if (deleteWorkout != null)
-            {
-                _context.Workout.Remove(deleteWorkout);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                return NotFound(new { success = false, message = "Workout not found. Nothing was deleted." });
-                // throw new Exception("fel");
-            }
-
-            return Ok(new { success = true, deletedWorkout = deleteWorkout.WorkoutName });
-
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Exception in DeleteWorkout: {ex}");
-
-            return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
-        }
-    }
 }

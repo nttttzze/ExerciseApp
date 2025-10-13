@@ -5,10 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Ganss.Xss;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyExerciseApp.Entities;
 using MyExerciseApp.Models;
+using MyExerciseApp.Services.Interfaces;
 
 namespace MyExerciseApp.Controllers;
 
@@ -16,42 +18,54 @@ namespace MyExerciseApp.Controllers;
 [Route("api/[controller]")]
 public class ScheduleController : ControllerBase
 {
-    private readonly DataContext _context;
-    private readonly HtmlSanitizer _htmlSanitizer = new();
+    // private readonly HtmlSanitizer _htmlSanitizer = new();
 
-    public ScheduleController(DataContext context)
+    private readonly IScheduleService _scheduleService;
+
+    public ScheduleController(IScheduleService scheduleService)
     {
-        _context = context;
+        _scheduleService = scheduleService;
     }
 
+
+    // 500 INTERNAL SERVER ERROR något med firstordefault? Behöve använda Microsoft.EntityFrameworkCore; 
+    // Nu är tiden fel, kanske fel inmatning.
     [HttpPost("scheduleWorkout/{workoutName}")]
     public async Task<IActionResult> ScheduleWorkout([FromBody] SchedulePostViewModel model, string workoutName)
     {
-        // var schedule = new Schedule
-        // {
-        //     ShceduledWorkout = model.ShceduledWorkout,
-        //     Workouts = [.. model.Workout.Select(e => new Workout {
-        //         WorkoutName = e.WorkoutName
-        //     })]
-        // };
-
-        var workout = await _context.Workout.FirstOrDefaultAsync(w => w.WorkoutName == workoutName);
-
-        if (workout == null)
+        try
         {
-            return NotFound(new { success = false, message = "Workout not found." });
+            var schedule = await _scheduleService.CreateWorkoutSchedule(model, workoutName);
+            return Ok(new { succes = true, schedule });
         }
-
-        var schedule = new Schedule
+        catch (KeyNotFoundException ex)
         {
+            return NotFound(new { success = false, message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Exception in AddWorkout: {ex}");
 
-            ShceduledWorkout = model.ScheduledWorkout,
-            Workouts = [workout]
-        };
+            return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
+        }
+    }
+    [HttpDelete("deleteSchedule/{scheduleId}")]
+    public async Task<IActionResult> DeleteSchedule(int scheduleId)
+    {
+        try
+        {
+            var deleteSchedule = await _scheduleService.DeleteScheduleAsync(scheduleId);
+            if (!deleteSchedule)
+            {
+                return NotFound(new { success = false, message = "Schedule not found." });
+            }
+            return Ok(new { success = true, message = "Schedule deleted succesfully." });
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Exception in DeleteWorkout: {ex}");
 
-        _context.Schedules.Add(schedule);
-        await _context.SaveChangesAsync();
-
-        return Ok(new { success = true, data = schedule });
+            return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
+        }
     }
 }
