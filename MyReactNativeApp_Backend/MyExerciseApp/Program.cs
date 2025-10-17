@@ -41,6 +41,9 @@ builder.Services.AddScoped<IExerciseService, ExerciseService>();
 builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 
+// Auth
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddCors();
 
 // builder.Services.AddIdentityCore<User>(options =>

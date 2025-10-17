@@ -49,6 +49,7 @@ public class ScheduleController : ControllerBase
             return StatusCode(500, new { success = false, message = "An error occurred. Please try again later." });
         }
     }
+
     [HttpDelete("deleteSchedule/{scheduleId}")]
     public async Task<IActionResult> DeleteSchedule(int scheduleId)
     {
